@@ -36,10 +36,14 @@ export class AuthenticationService {
 
     const token = await this.jwtService.signAsync(payload);
 
-    return token;
+    return JSON.stringify(token);
   }
 
   async signUp(createUserDto: CreateUserDto) {
+    if (!Object.keys(createUserDto).length) {
+      throw new HttpException(`Нет данных`, HttpStatus.BAD_REQUEST);
+    }
+
     const userExist = await this.userRepository.count({
       where: {
         username: createUserDto.username,
@@ -59,6 +63,6 @@ export class AuthenticationService {
     const user = new User({ ...createUserDto, password: hash });
     await this.userRepository.save(user);
 
-    return 'Пользователь зарегистрирован';
+    return JSON.stringify('Пользователь зарегистрирован');
   }
 }

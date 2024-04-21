@@ -3,7 +3,6 @@ import { Address } from './../../users/entities/address.entity';
 export class Profile {
   firstName: string = '';
   lastName: string = '';
-  age: number = 0;
   email: string = '';
   username: string = '';
   address: Address | null = null;
