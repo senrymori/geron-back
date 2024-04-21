@@ -40,10 +40,6 @@ export class AuthenticationService {
   }
 
   async signUp(createUserDto: CreateUserDto) {
-    if (!Object.keys(createUserDto).length) {
-      throw new HttpException(`Нет данных`, HttpStatus.BAD_REQUEST);
-    }
-
     const userExist = await this.userRepository.count({
       where: {
         username: createUserDto.username,
