@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
+import { Role, RolesProject } from './entities/role.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -13,50 +13,57 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly rolesProjectRepository: Repository<Role>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto) {
+  async create(tokenData: TokenData, createProjectDto: CreateProjectDto) {
+    const user = await this.userRepository.findOne({
+      where: { id: tokenData.id },
+    });
+
     const project = new Project(createProjectDto);
 
     await this.projectRepository.save(project);
+    await this.rolesProjectRepository.save({
+      user: { id: user.id },
+      project: { id: project.id },
+      role: RolesProject.admin,
+    });
 
-    return 'Проект добавлен';
+    return JSON.stringify('Проект создан');
   }
 
   async findAll(tokenData: TokenData) {
     return this.projectRepository.find({
-      where: { users: { id: tokenData.id } },
-    });
-  }
-
-  async findOne(id: string) {
-    return this.projectRepository.findOne({
-      where: { id },
-      relations: {
-        users: true,
+      where: {
+        roles: {
+          user: {
+            id: tokenData.id,
+          },
+        },
       },
     });
   }
 
-  async update(id: string, updateProjectDto: UpdateProjectDto) {
-    const project = new Project(updateProjectDto);
-
-    if (updateProjectDto?.userId) {
-      const user = await this.userRepository.findOneBy({
-        id: updateProjectDto.userId,
-      });
-
-      project.users = [...(project.users ?? []), user];
-    }
-
-    await this.projectRepository.save({ id, ...project });
-
-    return `Проект обновлен`;
-  }
-
-  async remove(id: string) {
-    await this.projectRepository.delete({ id });
-
-    return `Проект удален`;
+  async findParticipants(projectId: string) {
+    return this.rolesProjectRepository.find({
+      where: {
+        project: {
+          id: projectId,
+        },
+      },
+      relations: {
+        user: true,
+      },
+      select: {
+        role: true,
+        user: {
+          firstName: true,
+          username: true,
+          lastName: true,
+        },
+      },
+    });
   }
 }

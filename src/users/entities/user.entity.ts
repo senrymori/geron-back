@@ -1,16 +1,7 @@
 import { AbstractEntity } from 'src/abstractions/abstract.entity';
-import { Project } from 'src/projects/entities/project.entity';
+import { Role } from 'src/projects/entities/role.entity';
 import { Task } from 'src/projects/entities/task.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
-import { Address } from './address.entity';
+import { Column, Entity, JoinTable, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends AbstractEntity<User> {
@@ -23,19 +14,15 @@ export class User extends AbstractEntity<User> {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
   password: string;
 
-  @OneToOne(() => Address, { cascade: true, nullable: true })
-  @JoinColumn()
-  address: Address | null;
-
-  @ManyToMany(() => Project, (projects) => projects.users)
+  @OneToMany(() => Role, (role) => role.user)
   @JoinTable()
-  projects: Project[];
+  roles: Role[];
 
   @OneToMany(() => Task, (tasks) => tasks.user)
   @JoinTable()

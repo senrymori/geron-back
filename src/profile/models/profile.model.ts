@@ -1,11 +1,8 @@
-import { Address } from './../../users/entities/address.entity';
-
 export class Profile {
   firstName: string = '';
   lastName: string = '';
   email: string = '';
   username: string = '';
-  address: Address | null = null;
 
   constructor(item: any) {
     const keys = Object.keys(this);
