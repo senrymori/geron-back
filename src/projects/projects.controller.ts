@@ -1,16 +1,6 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetProjectFindAllResponse } from './response/get-project-find-all.response';
 import { GetParticipantsResponse } from './response/get-participants-response';
