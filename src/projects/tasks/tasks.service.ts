@@ -19,14 +19,22 @@ export class TasksService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto) {
+  async create(tokenData: TokenData, createTaskDto: CreateTaskDto) {
     const task = new Task(createTaskDto);
 
-    task.user = await this.userRepository.findOne({
-      where: {
-        id: createTaskDto.userId,
-      },
-    });
+    task.user = await this.userRepository.findOne(
+      createTaskDto.username
+        ? {
+            where: {
+              username: createTaskDto.username,
+            },
+          }
+        : {
+            where: {
+              id: tokenData.id,
+            },
+          },
+    );
 
     task.project = await this.projectRepository.findOne({
       where: { id: createTaskDto.projectId },
@@ -37,11 +45,14 @@ export class TasksService {
     return 'Задача добавлена в проект';
   }
 
-  async findAll(filters: GetTasksFilterDto) {
+  async findAll(filters: GetTasksFilterDto, tokenData?: TokenData) {
     let where: FindOptionsWhere<Task> = {};
 
-    if (filters.userId) {
-      where = { ...where, user: { id: filters.userId } };
+    if (filters.username || tokenData) {
+      where = {
+        ...where,
+        user: tokenData ? { id: tokenData.id } : { username: filters.username },
+      };
     }
 
     if (filters.projectId) {
@@ -50,20 +61,17 @@ export class TasksService {
 
     return this.taskRepository.find({
       relations: {
-        user: true,
         project: true,
       },
-      order: {
-        title: 'ASC',
+      select: {
+        user: {
+          firstName: true,
+          lastName: true,
+          username: true,
+        },
       },
       where,
     });
-  }
-
-  async update(id: string, updateTaskDto: UpdateTaskDto) {
-    const task = new Task(updateTaskDto);
-    await this.taskRepository.save({ id, ...task });
-    return 'Задача обновлена';
   }
 
   async remove(id: string) {

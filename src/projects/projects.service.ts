@@ -7,6 +7,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './entities/project.entity';
 import { Role, RolesProject } from './entities/role.entity';
 import { GetParticipantsResponse } from './response/get-participants-response';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
@@ -34,6 +35,44 @@ export class ProjectsService {
     });
 
     return JSON.stringify('Проект создан');
+  }
+
+  async update(projectId: string, updateProjectDto: UpdateProjectDto) {
+    if (updateProjectDto.name) {
+      await this.projectRepository.save({
+        id: projectId,
+        name: updateProjectDto.name,
+      });
+    }
+
+    for (const userName of updateProjectDto.users) {
+      const user = await this.userRepository.findOne({
+        where: {
+          username: userName,
+        },
+      });
+
+      const checkUserCreated = await this.rolesProjectRepository.findOne({
+        where: {
+          user: {
+            id: user.id,
+          },
+          project: {
+            id: projectId,
+          },
+        },
+      });
+
+      if (checkUserCreated) continue;
+
+      await this.rolesProjectRepository.save({
+        user: { id: user.id },
+        project: { id: projectId },
+        role: RolesProject.worker,
+      });
+    }
+
+    return JSON.stringify('Проект обновлен');
   }
 
   async findAll(tokenData: TokenData) {

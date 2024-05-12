@@ -1,11 +1,20 @@
 import { GetMembersResponse } from './response/get-members-response';
-import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Request,
+  Patch,
+} from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetProjectFindAllResponse } from './response/get-project-find-all.response';
 import { GetParticipantsResponse } from './response/get-participants-response';
 import { AddedUserToProjectDTO } from './dto/added-user-to-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @ApiTags('Проекты')
 @ApiBearerAuth()
@@ -19,6 +28,11 @@ export class ProjectsController {
     @Body() createProjectDto: CreateProjectDto,
   ) {
     return this.projectsService.create(req.user, createProjectDto);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
+    return this.projectsService.update(id, updateProjectDto);
   }
 
   @ApiOkResponse({ type: GetProjectFindAllResponse })

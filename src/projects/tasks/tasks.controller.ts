@@ -6,32 +6,37 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { GetTasksFilterDto } from '../dto/get-tasks-filter.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
+import { GetTasksResponse } from '../response/get-tasks-response';
 import { TasksService } from './tasks.service';
 
 @ApiTags('Задачи')
+@ApiBearerAuth()
 @Controller('tasks')
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
+  create(@Request() req: AuthRequest, @Body() createTaskDto: CreateTaskDto) {
+    return this.tasksService.create(req.user, createTaskDto);
   }
 
+  @ApiOkResponse({ type: GetTasksResponse })
   @Get()
   findAll(@Query() filters: GetTasksFilterDto) {
     return this.tasksService.findAll(filters);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(id, updateTaskDto);
+  @ApiOkResponse({ type: GetTasksResponse })
+  @Get('/my')
+  findMy(@Query() filters: GetTasksFilterDto, @Request() req: AuthRequest) {
+    return this.tasksService.findAll(filters, req.user);
   }
 
   @Delete(':id')
