@@ -45,31 +45,33 @@ export class ProjectsService {
       });
     }
 
-    for (const userName of updateProjectDto.users) {
-      const user = await this.userRepository.findOne({
-        where: {
-          username: userName,
-        },
-      });
-
-      const checkUserCreated = await this.rolesProjectRepository.findOne({
-        where: {
-          user: {
-            id: user.id,
+    if (updateProjectDto.users) {
+      for (const userName of updateProjectDto.users) {
+        const user = await this.userRepository.findOne({
+          where: {
+            username: userName,
           },
-          project: {
-            id: projectId,
+        });
+
+        const checkUserCreated = await this.rolesProjectRepository.findOne({
+          where: {
+            user: {
+              id: user.id,
+            },
+            project: {
+              id: projectId,
+            },
           },
-        },
-      });
+        });
 
-      if (checkUserCreated) continue;
+        if (checkUserCreated) continue;
 
-      await this.rolesProjectRepository.save({
-        user: { id: user.id },
-        project: { id: projectId },
-        role: RolesProject.worker,
-      });
+        await this.rolesProjectRepository.save({
+          user: { id: user.id },
+          project: { id: projectId },
+          role: RolesProject.worker,
+        });
+      }
     }
 
     return JSON.stringify('Проект обновлен');

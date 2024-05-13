@@ -1,10 +1,10 @@
-import { ArrayMinSize, IsArray, IsString, IsOptional } from 'class-validator';
+import { IsArray, IsString, IsOptional } from 'class-validator';
 
 export class UpdateProjectDto {
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @ArrayMinSize(0)
-  users: string[];
+  users?: string[];
 
   @IsOptional()
   @IsString()
