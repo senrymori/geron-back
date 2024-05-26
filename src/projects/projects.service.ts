@@ -177,6 +177,6 @@ export class ProjectsService {
       project: project,
     });
 
-    return `Пользователь ${dto.username} добавлен`;
+    return JSON.stringify(`Пользователь ${dto.username} добавлен`);
   }
 }

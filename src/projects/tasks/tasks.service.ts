@@ -42,7 +42,7 @@ export class TasksService {
 
     await this.taskRepository.save({ ...task, status: TaskStatus.create });
 
-    return 'Задача добавлена в проект';
+    return JSON.stringify('Задача добавлена в проект');
   }
 
   async findAll(filters: GetTasksFilterDto, tokenData?: TokenData) {
@@ -62,6 +62,7 @@ export class TasksService {
     return this.taskRepository.find({
       relations: {
         project: true,
+        user: true,
       },
       select: {
         user: {
@@ -76,6 +77,6 @@ export class TasksService {
 
   async remove(id: string) {
     await this.taskRepository.delete({ id });
-    return 'Задача удалена';
+    return JSON.stringify('Задача удалена');
   }
 }
